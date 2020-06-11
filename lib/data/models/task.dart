@@ -1,10 +1,34 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Task {
   String title;
+  String id;
   String note;
   DateTime time;
   String category;
 
-  Task({this.title, this.category, this.note, this.time});
+  Task({this.title, this.category, this.note, this.time, this.id});
+
+  Map<String, dynamic> toJson() {
+    var map = Map<String, dynamic>();
+    map['id'] = id ?? '';
+    map['title'] = title ?? '';
+    map['note'] = note ?? '';
+    map['category'] = category ?? "";
+
+    map['time'] = time != null ? Timestamp.fromDate(time) :Timestamp.fromDate(DateTime.now());
+    return map;
+  }
+
+  static Task fromJson(Map<String, dynamic> map){
+    return Task(
+      title: map['title'] ?? '',
+      note: map['note'] ?? '',
+      category: map['category'] ?? '',
+      id: map['id'] ?? '',
+      time: map['time']  != null? (map['time'] as Timestamp).toDate(): Timestamp.now().toDate(),
+);
+  }
 
   static List<Task> tasks = [
     Task(
