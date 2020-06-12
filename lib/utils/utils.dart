@@ -45,4 +45,12 @@ class AppUtils{
     }
     return value.toString();
   }
+
+  static String getDate(DateTime time) {
+    return "${addLeadingZeroIfNeeded(time.hour)}:"
+        "${addLeadingZeroIfNeeded(time.minute)} ${getMonthStringFull(time.month)} ${addLeadingZeroIfNeeded(time.day)}";
+  }
+  static String getDate2(DateTime time) {
+    return "${getMonthStringFull(time.month)} ${addLeadingZeroIfNeeded(time.day)}, ${addLeadingZeroIfNeeded(time.hour)}:${addLeadingZeroIfNeeded(time.minute)}";
+  }
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1005885972330",
+    "firebase_url": "https://tick-bc0e3.firebaseio.com",
+    "project_id": "tick-bc0e3",
+    "storage_bucket": "tick-bc0e3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005885972330:android:1677b619dae093c3540f13",
+        "android_client_info": {
+          "package_name": "mobi.com.task_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1005885972330-j2pbk2hsmao40p0nmc5cru283lhaohkb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsl-zkSOXLJ8pgL21AjEwueMQ21dXGsIY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1005885972330-j2pbk2hsmao40p0nmc5cru283lhaohkb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1005885972330-g3k5n54bb62gqjvr7sq1eq2no51ak0mi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "mobi.com.taskApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

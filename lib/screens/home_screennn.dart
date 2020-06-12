@@ -1,9 +1,14 @@
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:task_app/data/models/task.dart';
 import 'package:task_app/screens/category_detail_screen.dart';
+import 'package:task_app/screens/new_task_screen.dart';
 import 'package:task_app/utils/app_colors.dart';
 import 'package:task_app/utils/app_styles.dart';
+
+import '../data/view_models/task_view_model.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -14,10 +19,11 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with AfterLayoutMixin<MyHomePage> {
   int _counter = 0;
   List<Lists> _list = [];
-  List<Task> _tasks = Task.tasks;
+  List<Task> _tasks = [];
   List<Task> _workTasks = [];
   List<Task> _musicTasks = [];
   List<Task> _travelTasks = [];
@@ -25,6 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Task> _homeTasks = [];
   List<Task> _artTasks = [];
   List<Task> _shoppingTasks = [];
+
+  AbstractTaskViewModel _taskViewModel;
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -44,7 +52,21 @@ class _MyHomePageState extends State<MyHomePage> {
       Lists(name: "Shopping", icon: "shop", size: 23),
     ];
 
-    _tasks.forEach((task) {
+    //handleTasks(Task.tasks);
+
+    super.initState();
+  }
+
+  void handleTasks(List<Task> t) {
+    _tasks = [];
+    _workTasks = [];
+    _musicTasks = [];
+    _travelTasks = [];
+    _studyTasks = [];
+    _homeTasks = [];
+    _artTasks = [];
+    _shoppingTasks = [];
+    t.forEach((task) {
       if (task.category == "Work") {
         _workTasks.add(task);
       } else if (task.category == "Music") {
@@ -62,11 +84,41 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    super.initState();
+    _list.asMap().forEach((index,element) {
+      if (element.name == "Work") {
+        _list[index].size = _workTasks.length;
+      } else if (element.name == "Music") {
+        _list[index].size = _musicTasks.length;
+      } else if (element.name == "Travel") {
+        element.size = _travelTasks.length;
+      } else if (element.name == "Study") {
+        _list[index].size = _studyTasks.length;
+      } else if (element.name == "Home") {
+        _list[index].size = _homeTasks.length;
+      } else if (element.name == "Art") {
+        _list[index].size = _artTasks.length;
+      } else if (element.name == "Shopping") {
+        _list[index].size = _shoppingTasks.length;
+      } else if (element.name == "All") {
+        _list[index].size = t.length;
+      }
+    });
+
+    _tasks = t;
+    print("mmmm $_tasks");
+    setState(() {});
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) async {
+    _taskViewModel.listenForTasks().listen((event) {
+      handleTasks(event);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    _taskViewModel = Provider.of(context);
     return Scaffold(
       backgroundColor: AppColors.screenBgColor,
       body: SafeArea(
@@ -99,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
               gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
                 mainAxisSpacing: 22.0,
                 crossAxisSpacing: 22.0,
-                childAspectRatio: 1.1,
+                childAspectRatio: 1,
                 crossAxisCount: 2,
               ),
               delegate: new SliverChildBuilderDelegate(
@@ -112,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     child: new Container(
                       padding: EdgeInsets.all(20),
-                      height: 160,
+                      height: 166,
                       color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +199,9 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 45, right: 20),
         child: FloatingActionButton(
-          onPressed: _incrementCounter,
+          onPressed: (){
+            Navigator.of(context).push(NewTaskScreen.route());
+          },
           tooltip: 'Increment',
           child: Icon(Icons.add),
         ),

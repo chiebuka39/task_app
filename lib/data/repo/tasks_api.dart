@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/data/models/task.dart';
 
@@ -57,7 +59,7 @@ class TaskApi extends AbstractTaskApi{
   }
 
   @override
-  Future<DataResult<List<Task>>> fetchAllTasks({String churchId, String type}) async{
+  Future<DataResult<List<Task>>> fetchAllTasks() async{
     DataResult<List<Task>> result = DataResult();
     result.error = false;
 
@@ -81,12 +83,39 @@ class TaskApi extends AbstractTaskApi{
     return result;
   }
 
+  Stream<List<Task>> listenForTasks()  {
+    var streamTransformer =
+    StreamTransformer<QuerySnapshot, List<Task>>.fromHandlers(
+      handleData: (QuerySnapshot data, EventSink sink) {
+        List<Task> tasks = [];
+        data.documents.forEach((element) {
+          tasks.add(Task.fromJson(element.data));
+        });
+        sink.add(tasks);
+      },
+      handleError: (error, stacktrace, sink) {
+        print("ppppp release error");
+        sink.addError('Something went wrong: $error');
+      },
+      handleDone: (sink) {
+        sink.close();
+      },
+    );
+    final response =  database
+        .collection("tasks").snapshots();
+
+
+    return response.transform(streamTransformer);
+  }
+
+
 }
 
 abstract class AbstractTaskApi{
 
   Future<DataResult<void>> createTask(Task task);
   Future<DataResult<void>> editTask(Task task);
-  Future<DataResult<List<Task>>> fetchAllTasks({String churchId, String type});
+  Future<DataResult<List<Task>>> fetchAllTasks();
+  Stream<List<Task>> listenForTasks();
 
 }

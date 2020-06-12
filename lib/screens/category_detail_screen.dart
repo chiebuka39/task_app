@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:task_app/data/models/task.dart';
 import 'package:task_app/screens/home_screennn.dart';
+import 'package:task_app/screens/new_task_screen.dart';
 import 'package:task_app/utils/app_colors.dart';
 import 'package:task_app/utils/app_styles.dart';
 import 'package:task_app/utils/utils.dart';
+
+import '../utils/utils.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final Lists lists;
@@ -33,34 +36,42 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   var today = DateTime.now();
 
   void handleTasks(List<Task> tasks1) {
-    _pastTasks = tasks1.where((test) => test.time.day < today.day && test.time.month <= today.month).toList();
-    _newTasks = tasks1.where((test) => test.time.day > today.day && test.time.month >= today.month).toList();
+    _pastTasks = tasks1
+        .where((test) =>
+            test.time.day < today.day && test.time.month <= today.month)
+        .toList();
+    _newTasks = tasks1
+        .where((test) =>
+            test.time.day >= today.day && test.time.month >= today.month)
+        .toList();
+
     for (var i = 0; i < _newTasks.length; i++) {
       Task notif = _newTasks[i];
       //print("ooopp ${!notif.time.difference(DateTime.now()).isNegative} -- ${notif.time.toUtc()}");
 
-        if (i == 0) {
+      if (i == 0) {
+        tasks.add([notif]);
+      } else {
+        Task prevNotif = _newTasks[i - 1];
+        if (prevNotif.time.day != notif.time.day ||
+            prevNotif.time.month != notif.time.month) {
           tasks.add([notif]);
         } else {
-          Task prevNotif = _newTasks[i - 1];
-          if (prevNotif.time.day != notif.time.day ||
-              prevNotif.time.month != notif.time.month) {
-            tasks.add([notif]);
-          } else {
-            tasks.last.add(notif);
-          }
-
+          tasks.last.add(notif);
         }
-
-
+      }
     }
 
-    tasks.insert(0, _pastTasks);
-    print("tttt $tasks");
+    if (_pastTasks.isNotEmpty) {
+      tasks.insert(0, _pastTasks);
+    }
+
+    print("ttggtt $tasks");
   }
 
   @override
   void initState() {
+    print("cccc ${widget.tasks}");
     handleTasks(widget.tasks);
     super.initState();
   }
@@ -68,6 +79,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 45, right: 20),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(NewTaskScreen.route());
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ),
+      ),
       body: Stack(
         children: <Widget>[
           Positioned(
@@ -85,7 +106,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                       color: AppColors.white,
                     ),
                     SizedBox(
-                      height: 37,
+                      height: MediaQuery.of(context).size.height / 40,
                     ),
                     Container(
                       margin: EdgeInsets.only(left: 20),
@@ -136,55 +157,64 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40))),
               height: MediaQuery.of(context).size.height / 1.5,
-              child: widget.tasks.isNotEmpty ? CustomScrollView(
-                slivers: <Widget>[
-
-                  for (var c in tasks)
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20, top: 30),
-                          child: Text(
-                            getDatTitle(c.first),
-                            style: AppStyles.taskSubTitle,
-                          ),
-                        ),
-                        for (var i in c)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            margin: EdgeInsets.only(top: 20),
-                            height: 50,
-                            child: Row(
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      i.title,
-                                      style: AppStyles.taskItemTitle,
-                                    ),
-                                    SizedBox(
-                                      height: 7,
-                                    ),
-                                    Text(
-                                        "${AppUtils.addLeadingZeroIfNeeded(i.time.hour)}:"
-                                            "${AppUtils.addLeadingZeroIfNeeded(i.time.minute)} ${AppUtils.getMonthStringFull(i.time.month)} ${AppUtils.addLeadingZeroIfNeeded(i.time.day)}")
-                                  ],
+              child: widget.tasks.isNotEmpty
+                  ? CustomScrollView(
+                      slivers: <Widget>[
+                        for (var c in tasks)
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, top: 30),
+                                child: Text(
+                                  getDatTitle(c.first),
+                                  style: AppStyles.taskSubTitle,
                                 ),
-                                Spacer(),
-                                SvgPicture.asset("assets/images/unchecked.svg")
-                              ],
-                            ),
-                          )
-                      ]),
+                              ),
+                              for (var i in c)
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  margin: EdgeInsets.only(top: 20),
+                                  height: 50,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            i.title,
+                                            style: AppStyles.taskItemTitle,
+                                          ),
+                                          SizedBox(
+                                            height: 7,
+                                          ),
+                                          Text(AppUtils.getDate(i.time))
+                                        ],
+                                      ),
+                                      Spacer(),
+                                      SvgPicture.asset(
+                                          "assets/images/unchecked.svg")
+                                    ],
+                                  ),
+                                )
+                            ]),
+                          ),
+                      ],
+                    )
+                  : Center(
+                      child: Text("Empty"),
                     ),
-                ],
-              ): Center(child: Text("Empty"),),
             ),
           )
         ],
       ),
     );
+  }
+
+  String getDate(Task i) {
+    return "${AppUtils.addLeadingZeroIfNeeded(i.time.hour)}:"
+        "${AppUtils.addLeadingZeroIfNeeded(i.time.minute)} ${AppUtils.getMonthStringFull(i.time.month)} ${AppUtils.addLeadingZeroIfNeeded(i.time.day)}";
   }
 
   String getDatTitle(Task task) {
